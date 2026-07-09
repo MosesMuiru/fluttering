@@ -6,3 +6,6 @@ procedure
 
 location deps
 - add the permission request on top of the apps
+
+- note:
+remember to turn on preceise location

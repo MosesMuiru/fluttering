@@ -16,7 +16,7 @@ class _MapState extends State<MapPage>{
 	
  	LatLng? sourceLocation = null;
 
-	LatLng? _currentPos = null;
+	final LatLng kakamega = LatLng(0.2827, 34.7519);
 	Position? _currentUserLocation;
 
 	@override
@@ -32,14 +32,21 @@ class _MapState extends State<MapPage>{
 		return Scaffold(
 			body: GoogleMap(
 				initialCameraPosition: CameraPosition(
-					target: sourceLocation!, 
-					zoom: 10,
+					target: kakamega, 
+					zoom: 15,
 				),
 				markers: {
 				Marker(
-					markerId: MarkerId("_currentLocation"),
-					icon: BitmapDescriptor.defaultMarker,
+					markerId: const MarkerId("me"),
 					position: sourceLocation!,
+					icon: BitmapDescriptor.defaultMarkerWithHue(
+					BitmapDescriptor.hueBlue,
+					),
+				),
+				Marker(
+					markerId: MarkerId("location to show"),
+					icon: BitmapDescriptor.defaultMarker,
+					position: kakamega,
 				),
 			},
 			),
@@ -73,24 +80,34 @@ class _MapState extends State<MapPage>{
 			'Location permissions are permanarly denied, weconn'
 		);
 	}
+		// location settings
 		final LocationSettings locationSettings = LocationSettings(
-		accuracy: LocationAccuracy.high,
-		distanceFilter: 100,
-	);
+			accuracy: LocationAccuracy.best,
+			distanceFilter: 5,
+			timeLimit: Duration(seconds: 5),
+		);
+
+		try{
 
 		locationData = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
 		print('location data----------------->');
 		print(locationData);
 
 		var accuracy = await Geolocator.getLocationAccuracy();
-		print('location data----------------->');
+		print('location accuracy----------------->');
 		print(accuracy);
 
 
-		StreamSubscription<Position> positionStream = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
-		(Position? position) {
-				print(position == null ? 'Unknown' : '${locationData.latitude.toString()}, ${locationData.longitude.toString()}');
-			});
+		StreamSubscription<Position> positionStream =
+		Geolocator.getPositionStream(locationSettings: locationSettings).listen(
+		(Position? position) {	print('this is the position of the location currently ------------------------------->');
+				if (position != null) {
+      				print('Current location: ${position.latitude}, ${position.longitude}');
+				} else {
+     					 print('Unknown location');
+    					}
+				},
+		);
 
 
 
@@ -102,6 +119,9 @@ class _MapState extends State<MapPage>{
 				locationData.longitude,
 			);
 		});
+		} catch(e) {
+			print('error gettting location: $e');
+		}
 
 	}
 }
